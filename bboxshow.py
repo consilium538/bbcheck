@@ -72,8 +72,12 @@ class BBoxShow(QWidget):
             reload = True
             self.statedict['imglist'] = sorted([str(name.relative_to(self.statedict['imgdir']).with_suffix(''))
                                                 for name in Path(self.statedict['imgdir']).glob('**/*.png')])
-            for dirname in Path(self.statedict['changedir']).glob('*/**/'):
-                dirname.mkdir(parent=True, exist_ok=True)
+            dirlist = [
+                idx.relative_to(self.statedict['imgdir'])
+                for idx in Path(self.statedict['imgdir']).glob('*/**/')
+            ]
+            for dirname in dirlist:
+                (Path(self.statedict['changedir']) / dirname).mkdir(parents=True, exist_ok=True)
         self.statedict['current_img_idx'] = self.statedict.get('current_img_idx', 0)
 
         if 'bboxes' not in self.statedict:
@@ -136,9 +140,11 @@ class BBoxShow(QWidget):
         )
         painter.end()
 
-        self.setWindowTitle(f'{self.statedict["imglist"][self.statedict["current_img_idx"]]}'
-                            f'( {self.statedict["current_bbox_idx"]} / {len(self.statedict["bboxes"])} )')
+        self.setWindowTitle(f'{self.statedict["imglist"][self.statedict["current_img_idx"]]} | '
+                            f'( {self.statedict["current_bbox_idx"] + 1} / {len(self.statedict["bboxes"])} )')
         self.imagebox.setPixmap(pix_map)
+        self.adjustSize()
+        self.center()
 
     def next(self):
         if ('current_bbox_idx' in self.statedict and
