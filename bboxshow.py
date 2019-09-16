@@ -72,6 +72,8 @@ class BBoxShow(QWidget):
             reload = True
             self.statedict['imglist'] = sorted([str(name.relative_to(self.statedict['imgdir']).with_suffix(''))
                                                 for name in Path(self.statedict['imgdir']).glob('**/*.png')])
+            for dirname in Path(self.statedict['changedir']).glob('*/**/'):
+                dirname.mkdir(parent=True, exist_ok=True)
         self.statedict['current_img_idx'] = self.statedict.get('current_img_idx', 0)
 
         if 'bboxes' not in self.statedict:
