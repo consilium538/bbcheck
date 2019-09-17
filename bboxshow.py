@@ -79,14 +79,15 @@ class BBoxShow(QWidget):
             for dirname in dirlist:
                 (Path(self.statedict['changedir']) / dirname).mkdir(parents=True, exist_ok=True)
         self.statedict['current_img_idx'] = self.statedict.get('current_img_idx', 0)
+        print(f"current img idx : {self.statedict['current_img_idx']}")
 
-        if 'bboxes' not in self.statedict:
+        if 'bboxes' not in self.statedict or reload:
             self.statedict['bboxes'] = Yolo.read_yolo(
                 Path(self.statedict['origdir']) /
                 (self.statedict['imglist'][self.statedict['current_img_idx']] + '.txt')
             )
 
-        if 'bbox_nocheck' not in self.statedict:
+        if 'bbox_nocheck' not in self.statedict or reload:
             if Path.is_file(Path(self.statedict['changedir']) /
                             (self.statedict['imglist'][self.statedict['current_img_idx']] + '.txt')):
                 yolo = Yolo.read_yolo(
@@ -139,12 +140,13 @@ class BBoxShow(QWidget):
             bbox_int[2], bbox_int[3],
         )
         painter.end()
+        pix_map = pix_map.scaled(pix_map.width() * 2, pix_map.height() * 2)
 
         self.setWindowTitle(f'{self.statedict["imglist"][self.statedict["current_img_idx"]]} | '
                             f'( {self.statedict["current_bbox_idx"] + 1} / {len(self.statedict["bboxes"])} )')
         self.imagebox.setPixmap(pix_map)
-        self.adjustSize()
-        self.center()
+        # self.adjustSize()
+        # self.center()
 
     def next(self):
         if ('current_bbox_idx' in self.statedict and
@@ -156,9 +158,9 @@ class BBoxShow(QWidget):
                 self.maywrite()
                 return
             else:
+                self.maywrite()
                 self.statedict['current_img_idx'] += 1
                 self.statedict['current_bbox_idx'] = 0
-                self.maywrite()
                 self.refresh(True)
         else:
             self.statedict['current_bbox_idx'] += 1
